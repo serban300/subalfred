@@ -27,11 +27,8 @@ impl Cli {
 	pub(crate) fn new() -> Self {
 		let cli = Self::parse();
 
-		if let Ok(extra_log) = env::var("RUST_LOG") {
-			env::set_var("RUST_LOG", format!("{},{extra_log}", &cli.global_args.log));
-		} else {
-			env::set_var("RUST_LOG", &cli.global_args.log);
-		}
+		let extra_log = env::var("RUST_LOG").unwrap_or_default();
+		env::set_var("RUST_LOG", format!("warn,{},{extra_log}", &cli.global_args.log));
 
 		tracing_subscriber::fmt::init();
 
