@@ -72,11 +72,17 @@ impl Initializer {
 
 	/// Initialize the WS stream.
 	pub async fn connect(self, uri: &str) -> Result<Ws> {
-		let (mut ws_tx, mut ws_rx) = tokio_tungstenite::connect_async(uri)
-			.await
-			.map_err(error::Generic::Tungstenite)?
-			.0
-			.split();
+		let mut config = tokio_tungstenite::tungstenite::protocol::WebSocketConfig::default();
+		config.max_message_size = Some(2 << 34);
+		config.max_frame_size = Some(2 << 34);
+
+		let (mut ws_tx, mut ws_rx) =
+			tokio_tungstenite::connect_async_with_config(uri, Some(config), false)
+				.await
+				.map_err(error::Generic::Tungstenite)?
+				.0
+				.split();
+
 		let (tx, rx) = mpsc::channel(self.concurrency_limit);
 
 		tokio::spawn(async move {
@@ -382,7 +388,7 @@ impl Pool {
 				tracing::error!("{e:?}");
 			}
 		} else {
-			tracing::error!("unable to process raw message");
+			tracing::error!("unable to process raw message: {}", raw_response);
 		}
 	}
 }

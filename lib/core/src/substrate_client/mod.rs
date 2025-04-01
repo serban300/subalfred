@@ -20,7 +20,7 @@ use subruntimer::Header;
 use substorager::StorageKey;
 use subversioner::RuntimeVersion;
 
-const PAGE_SIZE: usize = 512;
+const PAGE_SIZE: usize = 1;
 
 /// A WS client for Substrate-like chain.
 #[derive(Clone)]
